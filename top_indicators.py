@@ -1,4 +1,7 @@
 from datetime import datetime, timedelta
+from pytrends.request import TrendReq
+from tabulate import tabulate
+import pandas as pd
 import numbers
 import requests
 import locale
@@ -16,6 +19,7 @@ import locale
 
 api = "https://api.cryptowat.ch"
 locale.setlocale(locale.LC_ALL, '')
+pytrends = TrendReq()
 
 class Result(object):
 	def __init__(self, name, description, remaining=0, units="days"):
@@ -24,6 +28,7 @@ class Result(object):
 		self.remaining = remaining
 		self.units = units
 
+	# TODO: Add inverse of remaining (progress)?
 	@property
 	def remaining(self):
 		return self.__remaining
@@ -38,7 +43,7 @@ class Result(object):
 	
 
 def days_after_halvening():
-	result = Result("Halvening", "Price has historically reached a peak 400-500 days after halvening events")
+	result = Result("Top after halvening", "Price has historically reached a peak 400-500 days after halvening events")
 
 	halvening = datetime(2020, 5, 19) # Predicted halvening May 19 2020
 	end = halvening + timedelta(days=400) # 400-500 days after halvening
@@ -76,8 +81,24 @@ def price_from_previous_top():
 	return result
 
 
+def google_trends():
+	result = Result("Google trends top", "Google trends spike hard at tops. Any move >=80 index is probably top on the longest timeframe. > Caveat: This is an index", units="units")
+	# Caveat: I'm not sure if indexes lag at all
+	# Monthly jumped to 39 in Nov 2017 prior to taking off to 100 in December
+
+
+	pytrends.build_payload(["bitcoin"], timeframe='all')
+
+	trends = pytrends.interest_over_time()
+
+	latest_index = trends.iloc[-1]['bitcoin'] # last row, bitcoin column
+
+	result.remaining = 80 - latest_index
+
+	return result
+
 if __name__ == "__main__":
-	indicators = [days_after_halvening(), full_top_to_top_cycle(), price_from_previous_top()]
+	indicators = [days_after_halvening(), full_top_to_top_cycle(), price_from_previous_top(), google_trends()]
 
 	for indicator in indicators:
 		print(f'{indicator.name}: {indicator.remaining:n} {indicator.units} remaining')
