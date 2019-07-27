@@ -1,6 +1,21 @@
 from datetime import datetime, timedelta
 import numbers
+import requests
+import locale
 
+
+# All top indicators should reach 100% at their conservative estimate
+# We want to predict when we're very close to the top, 
+# not observe when it happened after the fact
+
+# This is more a collection of codified thoughts than anything else.
+
+# For the most part I don't think data pre-2012 is very relevant or reliable
+# Data from 2013 onward is preferable, 2014+ is ideal
+
+
+api = "https://api.cryptowat.ch"
+locale.setlocale(locale.LC_ALL, '')
 
 class Result(object):
 	def __init__(self, name, description, remaining=0, units="days"):
@@ -20,20 +35,6 @@ class Result(object):
 		else:
 			self.__remaining = remaining
 			raise Exception('progress must be a number')
-
-# All top indicators should reach 100% at their conservative estimate
-# We want to predict when we're very close to the top, 
-# not observe when it happened after the fact
-
-# This is more a collection of codified thoughts than anything else.
-
-# For the most part I don't think data pre-2012 is very relevant or reliable
-# Data from 2013 onward is preferable, 2014+ is ideal
-
-# def day_countdown(end):
-# 	time_left = end.days / (end - start).days
-
-# 	return time_left
 	
 
 def days_after_halvening():
@@ -47,9 +48,9 @@ def days_after_halvening():
 	return result
 
 
-def full_cycle_length():
-	result = Result("Full Top to Top Cycle", "Cycle lengths appear to be getting longer, based on previous cycle of ~4 years")
-	# There's some evidence/belief that cycles are lengthening
+def full_top_to_top_cycle():
+	result = Result("Full top-to-top cycle", "Cycle lengths appear to be getting longer, based on previous cycle of ~4 years")
+	# There's some evidence/belief that cycles are lengthening and in that case 6 -> 6.5 years is more appropriate
 
 	start = datetime(2017, 12, 17) # Top of last cycle
 	end = start + timedelta(days=1477)
@@ -59,10 +60,26 @@ def full_cycle_length():
 	return result
 
 
+def price_from_previous_top():
+	result = Result("Price from previous top", "2011 -> 2013 was +3,500%, 2013 -> 2017 was +1,800%, prediction: +900%", units="dollars")
+	# The above predicts a price of 19,000 * 9 = 171,000
+	# That is kind of nuts so a more "conservative" (but still nuts) target price of 135,000 was chosen
+
+	response = requests.get(f"{api}/markets/coinbase-pro/btcusd/price")
+
+	json = response.json()
+
+	price = round(float(json["result"]["price"]),2)
+
+	result.remaining = 15000 * 9 - price
+
+	return result
+
+
 if __name__ == "__main__":
-	indicators = [days_after_halvening(), full_cycle_length()]
+	indicators = [days_after_halvening(), full_top_to_top_cycle(), price_from_previous_top()]
 
 	for indicator in indicators:
-		print(f'{indicator.name}: {indicator.remaining} {indicator.units} remaining')
+		print(f'{indicator.name}: {indicator.remaining:n} {indicator.units} remaining')
 
 
