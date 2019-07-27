@@ -29,6 +29,7 @@ class Result(object):
 		self.units = units
 
 	# TODO: Add inverse of remaining (progress)?
+	# TODO: Maybe add a "target" value
 	@property
 	def remaining(self):
 		return self.__remaining
@@ -85,7 +86,6 @@ def google_trends():
 	result = Result("Google trends top", "Google trends spike hard at tops. Any move >=80 index is probably top on the longest timeframe. > Caveat: This is an index", units="units")
 	# Caveat: I'm not sure if indexes lag at all
 	# Monthly jumped to 39 in Nov 2017 prior to taking off to 100 in December
-
 
 	pytrends.build_payload(["bitcoin"], timeframe='all')
 
