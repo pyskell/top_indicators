@@ -30,6 +30,7 @@ class Result(object):
 
 	# TODO: Add inverse of remaining (progress)?
 	# TODO: Maybe add a "target" value
+	# TODO: Maybe start, end, current, remaining
 	@property
 	def remaining(self):
 		return self.__remaining
