@@ -108,7 +108,7 @@ def price_from_previous_top():
 
 
 def google_trends():
-	result = Result("Google trends top", "Google trends spike hard at tops. Any move >=80 index is probably top on the longest timeframe. > Caveat: This is an index", units="units")
+	result = Result("Google trends top", "Google trends spike hard at tops. Any move >=80 index is probably top on the longest timeframe. > Caveat: This is an index", units="index")
 	# Caveat: I'm not sure if indexes lag at all
 	# Monthly jumped to 39 in Nov 2017 prior to taking off to 100 in December
 
