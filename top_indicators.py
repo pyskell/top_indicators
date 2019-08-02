@@ -24,16 +24,15 @@ locale.setlocale(locale.LC_ALL, '')
 pytrends = TrendReq()
 
 class Result(object):
-	def __init__(self, name, description, remaining=0, target=0, units="days"):
+	def __init__(self, name, description, current=0, remaining=0, target=0, units="days"):
 		self.name = name
 		self.description = description
+		self.current = current
 		self.target = target
 		self.remaining = remaining
 		self.units = units
 
-	# TODO: Add inverse of remaining (progress)?
-	# TODO: Maybe add a "target" value
-	# TODO: Maybe start, end, current, remaining
+	# TODO: In most cases remaining = target - current. May want to handle that in this object & create a special case for datetime/timedelta
 	@property
 	def remaining(self):
 		return self.__remaining
@@ -54,6 +53,14 @@ class Result(object):
 	def target(self, target):
 		self.__target = target
 	
+	@property
+	def current(self):
+		return self.__current
+
+	@current.setter
+	def current(self, current):
+		self.__current = current
+	
 
 def days_after_halvening():
 	result = Result("Top after halvening", "Price has historically reached a peak 400-500 days after halvening events")
@@ -61,6 +68,7 @@ def days_after_halvening():
 	halvening = datetime(2020, 5, 19) # Predicted halvening May 19 2020
 	end = halvening + timedelta(days=400) # 400-500 days after halvening
 
+	result.current = datetime.now()
 	# result.target = (end + datetime.now()).days
 	result.remaining = (end - datetime.now()).days
 
@@ -75,6 +83,7 @@ def full_top_to_top_cycle():
 	end = start + timedelta(days=1477)
 
 	# result.target = (end + datetime.now()).days
+	result.current = datetime.now()
 	result.remaining = (end - datetime.now()).days
 
 	return result
@@ -85,8 +94,9 @@ def price_from_previous_top():
 	# The above predicts a price of 19,000 * 9 = 171,000
 	# That is kind of nuts so a more "conservative" (but still nuts) target price of 135,000 was chosen
 
+	result.current = BITCOIN_PRICE
 	result.target = 15000 * 9
-	result.remaining = result.target - BITCOIN_PRICE
+	result.remaining = result.target - result.current
 
 	return result
 
@@ -100,10 +110,9 @@ def google_trends():
 
 	trends = pytrends.interest_over_time()
 
-	latest_index = trends.iloc[-1]['bitcoin'] # last row, bitcoin column
-
+	result.current = trends.iloc[-1]['bitcoin'] # last row, bitcoin column
 	result.target = 80
-	result.remaining = result.target - latest_index
+	result.remaining = result.target - result.current
 
 	return result
 
@@ -128,10 +137,9 @@ def sopr():
 	sopr_int = request.html.find('.ant-statistic-content-value-int')
 	sopr_dec = request.html.find('.ant-statistic-content-value-decimal')
 
-	sopr = float(sopr_int.text + sopr_dec.text)
-
+	result.current = float(sopr_int.text + sopr_dec.text)
 	result.target = 1.04
-	result.remaining = result.target - sopr
+	result.remaining = result.target - result.current
 
 	return result
 
@@ -147,8 +155,9 @@ def average_fee():
 	# TODO: There seems to be a big run up in fees, a drop, and then another run up before each bubble popped
 	result = Result("Average Fee", "Last run when fees jumped >25 we were close to the top", units="dollars")
 
+	result.current = BITCOIN_AVERAGE_FEE
 	result.target = 25
-	result.remaining = result.target - BITCOIN_AVERAGE_FEE
+	result.remaining = result.target - result.current
 
 	return result
 
@@ -156,8 +165,9 @@ def average_fee():
 def mvrv():
 	result = Result("MVRV", "Last runs showed peak MVRVs of ~7.5 (2011), ~5.6 (2013-start), ~5.8 (2013-end), ~4.6 (2017). Assuming ~4 for next top.", units="index")
 
+	result.current = BITCOIN_MVRV
 	result.target = 4
-	result.remaining = result.target - BITCOIN_MVRV
+	result.remaining = result.target - result.current
 
 	return result
 
@@ -168,7 +178,7 @@ if __name__ == "__main__":
 	results = []
 
 	for indicator in indicators:
-		results.append([indicator.name, f'{indicator.target:n} {indicator.units}', f'{indicator.remaining:n} {indicator.units}', indicator.description])
+		results.append([indicator.name, indicator.current, indicator.target, indicator.remaining, indicator.units, indicator.description])
 		# print(f'{indicator.name}: {indicator.remaining:n} {indicator.units} remaining')
 	
-	print(tabulate(results, headers=['Name', 'Target', 'Remaining', 'Description'], tablefmt='fancy_grid'))
+	print(tabulate(results, headers=['Name', 'Current', 'Target', 'Remaining', 'Units', 'Description'], tablefmt='fancy_grid'))
