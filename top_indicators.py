@@ -169,6 +169,9 @@ def average_fee():
 
 
 def mvrv():
+	# MVRV differs slightly between CoinMetrics and Woobull's charts. The below uses CoinMetrics data.
+	# https://coinmetrics.io/charts/#assets=btc_right=CapMVRVCur
+	# https://charts.woobull.com/bitcoin-mvrv-ratio/
 	result = Result("MVRV", "Last runs showed peak MVRVs of ~7.5 (2011), ~5.6 (2013-start), ~5.8 (2013-end), ~4.6 (2017). Assuming ~4 for next top.", units="index")
 
 	result.current = BITCOIN_MVRV
@@ -187,4 +190,9 @@ if __name__ == "__main__":
 		results.append([indicator.name, indicator.current, indicator.target, indicator.remaining, indicator.units, indicator.description])
 		# print(f'{indicator.name}: {indicator.remaining:n} {indicator.units} remaining')
 	
-	print(tabulate(results, headers=['Name', 'Current', 'Target', 'Remaining', 'Units', 'Description'], tablefmt='fancy_grid'))
+	print(tabulate(results, 
+		headers=['Name', 'Current', 'Target', 'Remaining', 'Units', 'Description'], 
+		colalign=["left", "center", "center", "right", "left", "left"],
+		floatfmt=["",",.2f",",.2f",",.2f","",""],
+		tablefmt='fancy_grid'
+		))
