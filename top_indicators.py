@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 from pytrends.request import TrendReq
 from tabulate import tabulate
 from requests_html import HTMLSession
@@ -47,6 +47,9 @@ class Result(object):
 
 	@property
 	def target(self):
+		if isinstance(self.__target, date):
+			return self.__target.strftime("%Y-%m-%d")
+
 		return self.__target
 	
 	@target.setter
@@ -55,6 +58,9 @@ class Result(object):
 	
 	@property
 	def current(self):
+		if isinstance(self.__current, date):
+			return self.__current.strftime("%Y-%m-%d")
+
 		return self.__current
 
 	@current.setter
