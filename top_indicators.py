@@ -96,7 +96,7 @@ def google_trends():
 
 # TODO: Finish once we get API access
 def sopr():
-	result = Result("SOPR Ratio", "Tends to go >=1.04 near tops (also local tops)")
+	result = Result("SOPR Ratio", "Tends to go >=1.04 near tops (also local tops)", units="index")
 
 	session = HTMLSession()
 	request = session.get('https://studio.glassnode.com/metrics?a=BTC&m=valuation.Sopr')
@@ -130,7 +130,7 @@ def average_fee():
 
 	# TODO: Median fees are also interesting.
 	# TODO: There seems to be a big run up in fees, a drop, and then another run up before each bubble popped
-	result = Result("Average Fee", "Last run when fees jumped >25 we were close to the top")
+	result = Result("Average Fee", "Last run when fees jumped >25 we were close to the top", units="dollars")
 
 	result.remaining = 25 - BITCOIN_AVERAGE_FEE
 
