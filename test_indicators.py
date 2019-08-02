@@ -17,3 +17,9 @@ def test_average_fee():
   result = average_fee()
 
   assert result.remaining is not None
+
+
+def test_mvrv():
+  result = mvrv()
+
+  assert result.remaining is not None

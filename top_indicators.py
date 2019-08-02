@@ -2,7 +2,8 @@ from datetime import datetime, timedelta
 from pytrends.request import TrendReq
 from tabulate import tabulate
 from requests_html import HTMLSession
-from shared_vars import BITCOIN_PRICE, BITCOIN_AVERAGE_FEE
+from tabulate import tabulate
+from shared_vars import BITCOIN_PRICE, BITCOIN_AVERAGE_FEE, BITCOIN_MVRV
 import pandas as pd
 import numbers
 import requests
@@ -137,10 +138,21 @@ def average_fee():
 	return result
 
 
+def mvrv():
+	result = Result("MVRV", "Last runs showed peak MVRVs of ~7.5 (2011), ~5.6 (2013-start), ~5.8 (2013-end), ~4.6 (2017). Assuming ~4 for next top.", units="index")
+
+	result.remaining = 4 - BITCOIN_MVRV
+
+	return result
+
 if __name__ == "__main__":
-	# indicators = [days_after_halvening(), full_top_to_top_cycle(), price_from_previous_top(), google_trends()]
+	# indicators = [days_after_halvening(), full_top_to_top_cycle(), price_from_previous_top(), google_trends(), average_fee(), mvrv()]
 	# indicators = [sopr()]
-	indicators = [average_fee()]
+	indicators = [mvrv()]
+	results = []
 
 	for indicator in indicators:
-		print(f'{indicator.name}: {indicator.remaining:n} {indicator.units} remaining')
+		results.append([indicator.name, f'{indicator.remaining:n} {indicator.units} remaining', indicator.description])
+		# print(f'{indicator.name}: {indicator.remaining:n} {indicator.units} remaining')
+	
+	print(tabulate(results, headers=['Name', 'Remaining', 'Description'], tablefmt='fancy_grid'))
