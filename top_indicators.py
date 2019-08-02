@@ -75,7 +75,7 @@ def days_after_halvening():
 	end = halvening + timedelta(days=400) # 400-500 days after halvening
 
 	result.current = datetime.now()
-	# result.target = (end + datetime.now()).days
+	result.target = end
 	result.remaining = (end - datetime.now()).days
 
 	return result
@@ -88,8 +88,8 @@ def full_top_to_top_cycle():
 	start = datetime(2017, 12, 17) # Top of last cycle
 	end = start + timedelta(days=1477)
 
-	# result.target = (end + datetime.now()).days
 	result.current = datetime.now()
+	result.target = end
 	result.remaining = (end - datetime.now()).days
 
 	return result
