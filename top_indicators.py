@@ -24,9 +24,10 @@ locale.setlocale(locale.LC_ALL, '')
 pytrends = TrendReq()
 
 class Result(object):
-	def __init__(self, name, description, remaining=0, units="days"):
+	def __init__(self, name, description, remaining=0, target=0, units="days"):
 		self.name = name
 		self.description = description
+		self.target = target
 		self.remaining = remaining
 		self.units = units
 
@@ -43,7 +44,15 @@ class Result(object):
 			self.__remaining = remaining
 		else:
 			self.__remaining = remaining
-			raise Exception('progress must be a number')
+			raise Exception('remaining must be a number')
+
+	@property
+	def target(self):
+		return self.__target
+	
+	@target.setter
+	def target(self, target):
+		self.__target = target
 	
 
 def days_after_halvening():
@@ -52,6 +61,7 @@ def days_after_halvening():
 	halvening = datetime(2020, 5, 19) # Predicted halvening May 19 2020
 	end = halvening + timedelta(days=400) # 400-500 days after halvening
 
+	# result.target = (end + datetime.now()).days
 	result.remaining = (end - datetime.now()).days
 
 	return result
@@ -64,17 +74,19 @@ def full_top_to_top_cycle():
 	start = datetime(2017, 12, 17) # Top of last cycle
 	end = start + timedelta(days=1477)
 
+	# result.target = (end + datetime.now()).days
 	result.remaining = (end - datetime.now()).days
 
 	return result
 
 
 def price_from_previous_top():
-	result = Result("Price from previous top", "2011 -> 2013 was +3,500%, 2013 -> 2017 was +1,800%, prediction: +900%", units="dollars")
+	result = Result("Price from previous top", "2011 -> 2013 was +3,500%, 2013 -> 2017 was +1,800%, prediction: +~700%", units="dollars")
 	# The above predicts a price of 19,000 * 9 = 171,000
 	# That is kind of nuts so a more "conservative" (but still nuts) target price of 135,000 was chosen
 
-	result.remaining = 15000 * 9 - BITCOIN_PRICE
+	result.target = 15000 * 9
+	result.remaining = result.target - BITCOIN_PRICE
 
 	return result
 
@@ -90,7 +102,8 @@ def google_trends():
 
 	latest_index = trends.iloc[-1]['bitcoin'] # last row, bitcoin column
 
-	result.remaining = 80 - latest_index
+	result.target = 80
+	result.remaining = result.target - latest_index
 
 	return result
 
@@ -117,7 +130,8 @@ def sopr():
 
 	sopr = float(sopr_int.text + sopr_dec.text)
 
-	result.remaining = 1.04 - sopr
+	result.target = 1.04
+	result.remaining = result.target - sopr
 
 	return result
 
@@ -133,7 +147,8 @@ def average_fee():
 	# TODO: There seems to be a big run up in fees, a drop, and then another run up before each bubble popped
 	result = Result("Average Fee", "Last run when fees jumped >25 we were close to the top", units="dollars")
 
-	result.remaining = 25 - BITCOIN_AVERAGE_FEE
+	result.target = 25
+	result.remaining = result.target - BITCOIN_AVERAGE_FEE
 
 	return result
 
@@ -141,18 +156,19 @@ def average_fee():
 def mvrv():
 	result = Result("MVRV", "Last runs showed peak MVRVs of ~7.5 (2011), ~5.6 (2013-start), ~5.8 (2013-end), ~4.6 (2017). Assuming ~4 for next top.", units="index")
 
-	result.remaining = 4 - BITCOIN_MVRV
+	result.target = 4
+	result.remaining = result.target - BITCOIN_MVRV
 
 	return result
 
 if __name__ == "__main__":
-	# indicators = [days_after_halvening(), full_top_to_top_cycle(), price_from_previous_top(), google_trends(), average_fee(), mvrv()]
+	indicators = [days_after_halvening(), full_top_to_top_cycle(), price_from_previous_top(), google_trends(), average_fee(), mvrv()]
 	# indicators = [sopr()]
-	indicators = [mvrv()]
+	# indicators = [mvrv()]
 	results = []
 
 	for indicator in indicators:
-		results.append([indicator.name, f'{indicator.remaining:n} {indicator.units} remaining', indicator.description])
+		results.append([indicator.name, f'{indicator.target:n} {indicator.units}', f'{indicator.remaining:n} {indicator.units}', indicator.description])
 		# print(f'{indicator.name}: {indicator.remaining:n} {indicator.units} remaining')
 	
-	print(tabulate(results, headers=['Name', 'Remaining', 'Description'], tablefmt='fancy_grid'))
+	print(tabulate(results, headers=['Name', 'Target', 'Remaining', 'Description'], tablefmt='fancy_grid'))
