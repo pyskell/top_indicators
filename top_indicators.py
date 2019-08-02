@@ -1,6 +1,8 @@
 from datetime import datetime, timedelta
 from pytrends.request import TrendReq
 from tabulate import tabulate
+from requests_html import HTMLSession
+from shared_vars import BITCOIN_PRICE, BITCOIN_AVERAGE_FEE
 import pandas as pd
 import numbers
 import requests
@@ -17,7 +19,6 @@ import locale
 # Data from 2013 onward is preferable, 2014+ is ideal
 
 
-api = "https://api.cryptowat.ch"
 locale.setlocale(locale.LC_ALL, '')
 pytrends = TrendReq()
 
@@ -72,13 +73,7 @@ def price_from_previous_top():
 	# The above predicts a price of 19,000 * 9 = 171,000
 	# That is kind of nuts so a more "conservative" (but still nuts) target price of 135,000 was chosen
 
-	response = requests.get(f"{api}/markets/coinbase-pro/btcusd/price")
-
-	json = response.json()
-
-	price = round(float(json["result"]["price"]),2)
-
-	result.remaining = 15000 * 9 - price
+	result.remaining = 15000 * 9 - BITCOIN_PRICE
 
 	return result
 
@@ -98,10 +93,54 @@ def google_trends():
 
 	return result
 
+
+# TODO: Finish once we get API access
+def sopr():
+	result = Result("SOPR Ratio", "Tends to go >=1.04 near tops (also local tops)")
+
+	session = HTMLSession()
+	request = session.get('https://studio.glassnode.com/metrics?a=BTC&m=valuation.Sopr')
+
+	request.html.render()
+
+	# f = open('sopr.html', 'w+')
+	# f.write(request.html.text)
+	# f.close()
+
+	# print(request.html)
+
+	sopr_elem = request.html.search('SOPR')
+
+	sopr_int = request.html.find('.ant-statistic-content-value-int')
+	sopr_dec = request.html.find('.ant-statistic-content-value-decimal')
+
+	sopr = float(sopr_int.text + sopr_dec.text)
+
+	result.remaining = 1.04 - sopr
+
+	return result
+
+
+def average_fee():
+	# Fees jump substantially off of the bottom, 370x 2011 ($0.001) -> 2013 ($0.30), and 625x 2015 ($0.04) -> 2017 ($25.00)
+	# Some considerations:
+	# Practical block sizes have changed (0.7 -> 0.8, segwit, increases early in bitcoin's history that im unaware of the timing of)
+	# Segwit effectively doubles the amount of typical transactions you can get in a block if everyone use SegWit
+	# Current SegWit usage is about 35% (8/2/19) https://segwit.space/
+
+	# TODO: Median fees are also interesting.
+	# TODO: There seems to be a big run up in fees, a drop, and then another run up before each bubble popped
+	result = Result("Average Fee", "Last run when fees jumped >25 we were close to the top")
+
+	result.remaining = 25 - BITCOIN_AVERAGE_FEE
+
+	return result
+
+
 if __name__ == "__main__":
-	indicators = [days_after_halvening(), full_top_to_top_cycle(), price_from_previous_top(), google_trends()]
+	# indicators = [days_after_halvening(), full_top_to_top_cycle(), price_from_previous_top(), google_trends()]
+	# indicators = [sopr()]
+	indicators = [average_fee()]
 
 	for indicator in indicators:
 		print(f'{indicator.name}: {indicator.remaining:n} {indicator.units} remaining')
-
-
