@@ -1,17 +1,19 @@
 from datetime import datetime, timedelta, date
-from enum import Enum, auto
+from enum import auto
 from pytrends.request import TrendReq
 from tabulate import tabulate
 from requests_html import HTMLSession
 from tabulate import tabulate
-from sqlalchemy import Column, Integer, UnicodeText, create_engine
+from sqlalchemy import Column, Integer, Date, Float, String, Enum, create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.ext.hybrid import hybrid_property
 
 import pandas as pd
 import numbers
 import requests
 import locale
+import enum
 
 from shared_vars import BITCOIN_PRICE, BITCOIN_AVERAGE_FEE, BITCOIN_MVRV
 
@@ -27,17 +29,24 @@ from shared_vars import BITCOIN_PRICE, BITCOIN_AVERAGE_FEE, BITCOIN_MVRV
 
 locale.setlocale(locale.LC_ALL, '')
 pytrends = TrendReq()
-
 engine = create_engine('sqlite:///top_indicators.db')
 Base = declarative_base(bind=engine)
 
-class Indicator(Enum):
+class Indicator(enum.Enum):
 	LEADING = auto() # Should reach its target *before* the top
 	LAGGING = auto() # Should reach its target *after* the top
 
-class Metric(object):
-	# __tablename__ = 'metrics'
-	# id = Column()
+class Metric(Base):
+	__tablename__ = 'metrics'
+	id = Column(Integer, primary_key=True)
+	name = Column(String(40))
+	# description = Column(String(256))
+	__current = Column("current", String(40), nullable=True)
+	__target = Column("target", String(40), nullable=True)
+	__remaining = Column("remaining", String(40), nullable=True)
+	units = Column(String(40))
+	# indicator_type = Column(Enum(Indicator))
+
 	def __init__(self, name, description, current=0, remaining=0, target=0, units="days", indicator_type=Indicator.LEADING):
 		self.name = name
 		self.description = description
@@ -48,7 +57,7 @@ class Metric(object):
 		self.indicator_type = indicator_type
 
 	# TODO: In most cases remaining = target - current. May want to handle that in this object & create a special case for datetime/timedelta
-	@property
+	@hybrid_property
 	def remaining(self):
 		return self.__remaining
 
@@ -60,7 +69,7 @@ class Metric(object):
 			self.__remaining = remaining
 			raise Exception('remaining must be a number')
 
-	@property
+	@hybrid_property
 	def target(self):
 		if isinstance(self.__target, date):
 			return self.__target.strftime("%Y-%m-%d")
@@ -71,7 +80,7 @@ class Metric(object):
 	def target(self, target):
 		self.__target = target
 	
-	@property
+	@hybrid_property
 	def current(self):
 		if isinstance(self.__current, date):
 			return self.__current.strftime("%Y-%m-%d")
@@ -81,7 +90,13 @@ class Metric(object):
 	@current.setter
 	def current(self, current):
 		self.__current = current
-	
+
+# TODO: Remove this once we're saving the data correctly	
+Base.metadata.drop_all(engine)   # all tables are deleted
+Base.metadata.create_all()
+Session = sessionmaker(bind=engine)
+s = Session()
+
 
 def days_after_halvening():
 	metric = Metric("Top after halvening", "Price has historically reached a peak 400-500 days after halvening events", 
@@ -208,14 +223,18 @@ def mvrv():
 	return metric
 
 if __name__ == "__main__":
-	indicators = [days_after_halvening(), full_top_to_top_cycle(), price_from_previous_top(), google_trends(), average_fee(), mvrv()]
+	metrics = [days_after_halvening(), full_top_to_top_cycle(), price_from_previous_top(), google_trends(), average_fee(), mvrv()]
 	# indicators = [sopr()]
 	# indicators = [mvrv()]
 	results = []
 
-	for indicator in indicators:
-		results.append([indicator.name, indicator.current, indicator.target, indicator.remaining, indicator.units, indicator.description])
+	for metric in metrics:
+		results.append([metric.name, metric.current, metric.target, metric.remaining, metric.units, metric.description])
+		s.add(metric)
 		# print(f'{indicator.name}: {indicator.remaining:n} {indicator.units} remaining')
+	
+	# s.add_all(results)
+	s.commit()
 	
 	print(tabulate(results, 
 		headers=['Name', 'Current', 'Target', 'Remaining', 'Units', 'Description'], 
