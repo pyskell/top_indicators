@@ -224,7 +224,7 @@ def mvrv():
 
 
 def gbtc():
-	metric = Metric("GBTC over NAV", "Last run GBTC market price traded at a peak of 2x NAV at the top")
+	metric = Metric("GBTC over NAV", "Last run GBTC market price traded at a peak of 2x NAV at the top", "dollars")
 
 	session = HTMLSession()
 	request = session.get('https://grayscale.co/bitcoin-investment-trust/')
