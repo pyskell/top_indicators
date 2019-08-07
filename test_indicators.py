@@ -35,3 +35,9 @@ def test_metric_completion():
   result = Metric("","", current=1, target=2)
 
   assert result.completion == 0.5
+
+
+def test_progress_bar():
+  result = Metric("","", current=1, target=2)
+
+  assert result.progress_bar == "|##################################################--------------------------------------------------| 50.0%"

@@ -16,6 +16,7 @@ import locale
 import enum
 
 from shared_vars import BITCOIN_PRICE, BITCOIN_AVERAGE_FEE, BITCOIN_MVRV
+from progress_bar import printProgressBar
 
 # All top indicators should reach 100% at their conservative estimate
 # We want to predict when we're very close to the top, 
@@ -94,6 +95,10 @@ class Metric(Base):
 	@property
 	def completion(self):
 		return self.__current / self.__target
+
+	@property
+	def progress_bar(self):
+		return printProgressBar(self.__current, self.__target)
 
 # TODO: Remove this once we're saving the data correctly	
 Base.metadata.drop_all(engine)   # all tables are deleted
