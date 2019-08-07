@@ -29,3 +29,9 @@ def test_gbtc():
   result = gbtc()
 
   assert result.remaining is not None
+
+
+def test_metric_completion():
+  result = Metric("","", current=1, target=2)
+
+  assert result.completion == 0.5

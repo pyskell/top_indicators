@@ -91,6 +91,10 @@ class Metric(Base):
 	def current(self, current):
 		self.__current = current
 
+	@property
+	def completion(self):
+		return self.__current / self.__target
+
 # TODO: Remove this once we're saving the data correctly	
 Base.metadata.drop_all(engine)   # all tables are deleted
 Base.metadata.create_all()
