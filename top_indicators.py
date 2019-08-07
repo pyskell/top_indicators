@@ -232,8 +232,8 @@ def gbtc():
 	gbtc_market_pp_share = float(request.html.find('.price-market .body .price', first=True).text.replace('$',''))
 	gbtc_nav_pp_share = float(request.html.find('.price-nav .body .price', first=True).text.replace('$',''))
 
-	metric.current = gbtc_market_pp_share
-	metric.target = gbtc_nav_pp_share * 2
+	metric.current = gbtc_nav_pp_share
+	metric.target = gbtc_market_pp_share * 2
 	metric.remaining = metric.target - metric.current
 
 	return metric
