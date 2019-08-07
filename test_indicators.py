@@ -23,3 +23,9 @@ def test_mvrv():
   result = mvrv()
 
   assert result.remaining is not None
+
+
+def test_gbtc():
+  result = gbtc()
+
+  assert result.remaining is not None

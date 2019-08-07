@@ -222,6 +222,22 @@ def mvrv():
 
 	return metric
 
+
+def gbtc():
+	metric = Metric("GBTC over NAV", "Last run GBTC market price traded at a peak of 2x NAV at the top")
+
+	session = HTMLSession()
+	request = session.get('https://grayscale.co/bitcoin-investment-trust/')
+
+	gbtc_market_pp_share = float(request.html.find('.price-market .body .price', first=True).text.replace('$',''))
+	gbtc_nav_pp_share = float(request.html.find('.price-nav .body .price', first=True).text.replace('$',''))
+
+	metric.current = gbtc_market_pp_share
+	metric.target = gbtc_nav_pp_share * 2
+	metric.remaining = metric.target - metric.current
+
+	return metric
+
 if __name__ == "__main__":
 	metrics = [days_after_halvening(), full_top_to_top_cycle(), price_from_previous_top(), google_trends(), average_fee(), mvrv()]
 	# indicators = [sopr()]
