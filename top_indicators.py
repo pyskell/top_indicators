@@ -16,7 +16,7 @@ import locale
 import enum
 
 from shared_vars import BITCOIN_PRICE, BITCOIN_AVERAGE_FEE, BITCOIN_MVRV
-from progress_bar import printProgressBar
+from progress_bar import progress_bar
 
 # All top indicators should reach 100% at their conservative estimate
 # We want to predict when we're very close to the top, 
@@ -94,11 +94,17 @@ class Metric(Base):
 
 	@property
 	def completion(self):
-		return self.__current / self.__target
+		if isinstance(self.__current, numbers.Number) and isinstance(self.__target, numbers.Number):
+			return self.__current / self.__target
+
+		return None
 
 	@property
 	def progress_bar(self):
-		return printProgressBar(self.__current, self.__target)
+		if isinstance(self.__current, numbers.Number) and isinstance(self.__target, numbers.Number):
+			return progress_bar(self.__current, self.__target)
+		else:
+			return None
 
 # TODO: Remove this once we're saving the data correctly	
 Base.metadata.drop_all(engine)   # all tables are deleted
@@ -254,7 +260,7 @@ if __name__ == "__main__":
 	results = []
 
 	for metric in metrics:
-		results.append([metric.name, metric.current, metric.target, metric.remaining, metric.units, metric.description])
+		results.append([metric.name, metric.current, metric.target, metric.remaining, metric.units, f'{metric.description}\n{metric.progress_bar if metric.progress_bar else ""}'])
 		s.add(metric)
 		# print(f'{indicator.name}: {indicator.remaining:n} {indicator.units} remaining')
 	
@@ -262,7 +268,7 @@ if __name__ == "__main__":
 	s.commit()
 	
 	print(tabulate(results, 
-		headers=['Name', 'Current', 'Target', 'Remaining', 'Units', 'Description'], 
+		headers=['Name', 'Current', 'Target', 'Remaining', 'Units', 'Description + Progress'], 
 		colalign=["left", "center", "center", "right", "left", "left"],
 		floatfmt=["",",.2f",",.2f",",.2f","",""],
 		tablefmt='fancy_grid'
