@@ -273,22 +273,29 @@ def fear_and_greed():
 
 def top_cap():
 	# https://charts.woobull.com/bitcoin-price-models/
-	metric = Metric("Top Cap", "Bitcoin appears to hit tops when it's at 35x its forever average market cap", units="dollars")
+	metric = Metric("Top Cap", "Bitcoin appears to hit tops when it's at 35x its forever average market cap. Targeting x32", units="dollars")
 
 	metric.current = BITCOIN_CURRENT_MCAP
-	metric.target = BITCOIN_AVERAGE_MCAP * 32 #x32 to play it safe and partially compensate for CoinMetrics data not matching Willy Woo's exactly
+	# *32 to play it safe and partially compensate for CoinMetrics data not matching Willy Woo's exactly (his goes back to 2010)
+	metric.target = BITCOIN_AVERAGE_MCAP * 32 
 	metric.remaining = metric.target - metric.current
 
 	return metric
 
 
 if __name__ == "__main__":
+	# NOTE: Tabulate has an issue where if it encounters a value it can't format in a column it won't format the rest of the column
 	metrics = [days_after_halvening(), full_top_to_top_cycle(), price_from_previous_top(), google_trends(), average_fee(), mvrv(), gbtc(), fear_and_greed(), top_cap()]
-	# metrics = [fear_and_greed()]
+	# metrics = [price_from_previous_top()]
 	results = []
 
 	for metric in metrics:
-		results.append([metric.name, metric.current, metric.target, metric.remaining, metric.units, f'{metric.description}\n{metric.progress_bar if metric.progress_bar else ""}'])
+
+		# TODO: This is ugly, make better
+		if not isinstance(metric.current, str):
+			results.append([metric.name, "{:,.2f}".format(metric.current), "{:,.2f}".format(metric.target), "{:,.2f}".format(metric.remaining), metric.units, f'{metric.description}\n{metric.progress_bar if metric.progress_bar else ""}'])			
+		else:
+			results.append([metric.name, metric.current, metric.target, metric.remaining, metric.units, f'{metric.description}\n{metric.progress_bar if metric.progress_bar else ""}'])
 		
 		# We only want to store this data once per day
 		exists = s.query(Metric).get((metric.date, metric.name))
@@ -301,6 +308,6 @@ if __name__ == "__main__":
 	print(tabulate(results, 
 		headers=['Name', 'Current', 'Target', 'Remaining', 'Units', 'Description + Progress'], 
 		colalign=["left", "center", "center", "right", "left", "left"],
-		floatfmt=["",",.2f",",.2f",",.2f","",""],
+		# floatfmt=["","","","","",""],
 		tablefmt='fancy_grid'
 		))
