@@ -41,3 +41,9 @@ def test_progress_bar():
   result = Metric("","", current=1, target=2)
 
   assert result.progress_bar == "|##################################################--------------------------------------------------| 50.0%"
+
+
+def test_fear_and_greed():
+  result = fear_and_greed()
+
+  assert result.remaining is not None

@@ -37,3 +37,8 @@ cm_mvrv_query = urlencode({
 cm_mvrv_response = requests.get(f"{COINMETRICS_API}/assets/btc/metricdata?{cm_mvrv_query}")
 cm_mvrv_json = cm_mvrv_response.json()
 BITCOIN_MVRV = float(cm_mvrv_json['metricData']['series'][0]['values'][0])
+
+## Bitcoin fear & greed index
+fgi_response = requests.get('https://api.alternative.me/fng/?limit=1')
+fgi_json = fgi_response.json()
+BITCOIN_FEAR_GREED_INDEX = int(fgi_json['data'][0]['value'])

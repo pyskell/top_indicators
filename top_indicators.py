@@ -15,7 +15,7 @@ import requests
 import locale
 import enum
 
-from shared_vars import BITCOIN_PRICE, BITCOIN_AVERAGE_FEE, BITCOIN_MVRV
+from shared_vars import BITCOIN_PRICE, BITCOIN_AVERAGE_FEE, BITCOIN_MVRV, BITCOIN_FEAR_GREED_INDEX
 from progress_bar import progress_bar
 
 # All top indicators should reach 100% at their conservative estimate
@@ -114,6 +114,8 @@ Base.metadata.create_all()
 Session = sessionmaker(bind=engine)
 s = Session()
 
+
+# TODO: Make all these functions subclasses of Metric
 
 def days_after_halvening():
 	metric = Metric("Top after halvening", "Price has historically reached a peak 400-500 days after halvening events", 
@@ -241,7 +243,8 @@ def mvrv():
 
 
 def gbtc():
-	metric = Metric("GBTC over NAV", "Last run GBTC market price traded at a peak of 2x NAV at the top. Looking for 1.8x.", "dollars")
+	metric = Metric("GBTC over NAV", "Last run GBTC market price traded at a peak of 2x NAV at the top. Looking for 1.8x.", 
+		units="dollars")
 
 	session = HTMLSession()
 	request = session.get('https://grayscale.co/bitcoin-investment-trust/')
@@ -255,10 +258,22 @@ def gbtc():
 
 	return metric
 
+
+def fear_and_greed():
+	# https://alternative.me/crypto/fear-and-greed-index/#data-sources
+	metric = Metric("Fear & Greed Index", "Good short-term indicator on whether or not the market is greedy. >80 is very concerning. >90 is gtfo.", 
+		units="index")
+
+	metric.current = BITCOIN_FEAR_GREED_INDEX
+	metric.target = 80
+	metric.remaining = metric.target - metric.current
+
+	return metric
+
+
 if __name__ == "__main__":
-	metrics = [days_after_halvening(), full_top_to_top_cycle(), price_from_previous_top(), google_trends(), average_fee(), mvrv(), gbtc()]
-	# indicators = [sopr()]
-	# indicators = [mvrv()]
+	metrics = [days_after_halvening(), full_top_to_top_cycle(), price_from_previous_top(), google_trends(), average_fee(), mvrv(), gbtc(), fear_and_greed()]
+	# metrics = [fear_and_greed()]
 	results = []
 
 	for metric in metrics:
@@ -268,7 +283,6 @@ if __name__ == "__main__":
 		exists = s.query(Metric).get((metric.date, metric.name))
 		if not exists:
 			s.add(metric)
-		# print(f'{indicator.name}: {indicator.remaining:n} {indicator.units} remaining')
 	
 	# s.add_all(results)
 	s.commit()
