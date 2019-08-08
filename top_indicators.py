@@ -39,8 +39,9 @@ class Indicator(enum.Enum):
 
 class Metric(Base):
 	__tablename__ = 'metrics'
-	id = Column(Integer, primary_key=True)
-	name = Column(String(40))
+	# id = Column(Integer, primary_key=True)
+	date = Column(Date, primary_key=True)
+	name = Column(String(40), primary_key=True)
 	# description = Column(String(256))
 	__current = Column("current", String(40), nullable=True)
 	__target = Column("target", String(40), nullable=True)
@@ -56,6 +57,7 @@ class Metric(Base):
 		self.remaining = remaining
 		self.units = units
 		self.indicator_type = indicator_type
+		self.date = datetime.now().date()
 
 	# TODO: In most cases remaining = target - current. May want to handle that in this object & create a special case for datetime/timedelta
 	@hybrid_property
@@ -107,7 +109,7 @@ class Metric(Base):
 			return None
 
 # TODO: Remove this once we're saving the data correctly	
-Base.metadata.drop_all(engine)   # all tables are deleted
+# Base.metadata.drop_all(engine)   # all tables are deleted
 Base.metadata.create_all()
 Session = sessionmaker(bind=engine)
 s = Session()
@@ -167,9 +169,9 @@ def google_trends():
 
 	trends = pytrends.interest_over_time()
 
-	metric.current = trends.iloc[-1]['bitcoin'] # last row, bitcoin column
+	metric.current = int(trends.iloc[-1]['bitcoin']) # last row, bitcoin column
 	metric.target = 80
-	metric.remaining = metric.target - metric.current
+	metric.remaining = int(metric.target - metric.current)
 
 	return metric
 
@@ -261,7 +263,11 @@ if __name__ == "__main__":
 
 	for metric in metrics:
 		results.append([metric.name, metric.current, metric.target, metric.remaining, metric.units, f'{metric.description}\n{metric.progress_bar if metric.progress_bar else ""}'])
-		s.add(metric)
+		
+		# We only want to store this data once per day
+		exists = s.query(Metric).get((metric.date, metric.name))
+		if not exists:
+			s.add(metric)
 		# print(f'{indicator.name}: {indicator.remaining:n} {indicator.units} remaining')
 	
 	# s.add_all(results)
