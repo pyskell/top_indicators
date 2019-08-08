@@ -15,7 +15,7 @@ import requests
 import locale
 import enum
 
-from shared_vars import BITCOIN_PRICE, BITCOIN_AVERAGE_FEE, BITCOIN_MVRV, BITCOIN_FEAR_GREED_INDEX
+from shared_vars import BITCOIN_PRICE, BITCOIN_AVERAGE_FEE, BITCOIN_MVRV, BITCOIN_FEAR_GREED_INDEX, BITCOIN_AVERAGE_MCAP, BITCOIN_CURRENT_MCAP
 from progress_bar import progress_bar
 
 # All top indicators should reach 100% at their conservative estimate
@@ -62,7 +62,7 @@ class Metric(Base):
 	# TODO: In most cases remaining = target - current. May want to handle that in this object & create a special case for datetime/timedelta
 	@hybrid_property
 	def remaining(self):
-		return self.__remaining
+		return float(self.__remaining)
 
 	@remaining.setter
 	def remaining(self, remaining):
@@ -77,7 +77,7 @@ class Metric(Base):
 		if isinstance(self.__target, date):
 			return self.__target.strftime("%Y-%m-%d")
 
-		return self.__target
+		return float(self.__target)
 	
 	@target.setter
 	def target(self, target):
@@ -88,7 +88,7 @@ class Metric(Base):
 		if isinstance(self.__current, date):
 			return self.__current.strftime("%Y-%m-%d")
 
-		return self.__current
+		return float(self.__current)
 
 	@current.setter
 	def current(self, current):
@@ -271,8 +271,19 @@ def fear_and_greed():
 	return metric
 
 
+def top_cap():
+	# https://charts.woobull.com/bitcoin-price-models/
+	metric = Metric("Top Cap", "Bitcoin appears to hit tops when it's at 35x its forever average market cap", units="dollars")
+
+	metric.current = BITCOIN_CURRENT_MCAP
+	metric.target = BITCOIN_AVERAGE_MCAP * 32 #x32 to play it safe and partially compensate for CoinMetrics data not matching Willy Woo's exactly
+	metric.remaining = metric.target - metric.current
+
+	return metric
+
+
 if __name__ == "__main__":
-	metrics = [days_after_halvening(), full_top_to_top_cycle(), price_from_previous_top(), google_trends(), average_fee(), mvrv(), gbtc(), fear_and_greed()]
+	metrics = [days_after_halvening(), full_top_to_top_cycle(), price_from_previous_top(), google_trends(), average_fee(), mvrv(), gbtc(), fear_and_greed(), top_cap()]
 	# metrics = [fear_and_greed()]
 	results = []
 

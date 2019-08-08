@@ -1,4 +1,5 @@
 from top_indicators import *
+from shared_vars import BITCOIN_AVERAGE_MCAP
 
 
 def test_sopr():
@@ -45,5 +46,11 @@ def test_progress_bar():
 
 def test_fear_and_greed():
   result = fear_and_greed()
+
+  assert result.remaining is not None
+
+
+def test_top_cap():
+  result = top_cap()
 
   assert result.remaining is not None

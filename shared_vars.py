@@ -1,6 +1,7 @@
 import requests
 from urllib.parse import urlencode
 from datetime import datetime, timedelta
+# from itertools import accumulate
 
 CRYPTO_WATCH_API = "https://api.cryptowat.ch"
 COINMETRICS_API = "https://community-api.coinmetrics.io/v2"
@@ -37,6 +38,27 @@ cm_mvrv_query = urlencode({
 cm_mvrv_response = requests.get(f"{COINMETRICS_API}/assets/btc/metricdata?{cm_mvrv_query}")
 cm_mvrv_json = cm_mvrv_response.json()
 BITCOIN_MVRV = float(cm_mvrv_json['metricData']['series'][0]['values'][0])
+
+## Bitcoin Average Market Cap
+cm_avg_mcap_query = urlencode({
+  'metrics': 'CapMrktCurUSD',
+  'start': '2011-02-02', # TODO: change to earliest date 20110202
+  'end': cm_yesterday
+})
+
+url = f"{COINMETRICS_API}/assets/btc/metricdata?{cm_avg_mcap_query}"
+
+cm_avg_mcap_response = requests.get(f"{COINMETRICS_API}/assets/btc/metricdata?{cm_avg_mcap_query}")
+cm_avg_mcap_json = cm_avg_mcap_response.json()
+cm_mcaps = cm_avg_mcap_json['metricData']['series']
+
+def get_val(series):
+  return float(series["values"][0])
+
+cm_mcaps_sum = sum(map(get_val, cm_mcaps))
+cm_mcap_length = len(cm_mcaps)
+BITCOIN_CURRENT_MCAP = get_val(cm_mcaps[-1])
+BITCOIN_AVERAGE_MCAP = cm_mcaps_sum / cm_mcap_length
 
 ## Bitcoin fear & greed index
 fgi_response = requests.get('https://api.alternative.me/fng/?limit=1')
