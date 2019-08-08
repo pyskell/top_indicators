@@ -285,7 +285,7 @@ def top_cap():
 
 if __name__ == "__main__":
 	# NOTE: Tabulate has an issue where if it encounters a value it can't format in a column it won't format the rest of the column
-	metrics = [days_after_halvening(), full_top_to_top_cycle(), price_from_previous_top(), google_trends(), average_fee(), mvrv(), gbtc(), fear_and_greed(), top_cap()]
+	metrics = [days_after_halvening(), full_top_to_top_cycle(), price_from_previous_top(), average_fee(), top_cap(), gbtc(), mvrv(), google_trends(), fear_and_greed()]
 	# metrics = [price_from_previous_top()]
 	results = []
 
