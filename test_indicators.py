@@ -54,3 +54,9 @@ def test_top_cap():
   result = top_cap()
 
   assert result.remaining is not None
+
+
+def test_mayer_multiple():
+  result = mayer_multiple()
+
+  assert result.remaining is not None

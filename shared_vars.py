@@ -55,10 +55,13 @@ cm_mcaps = cm_avg_mcap_json['metricData']['series']
 def get_val(series):
   return float(series["values"][0])
 
-cm_mcaps_sum = sum(map(get_val, cm_mcaps))
+cm_mcaps_all_time_sum = sum(map(get_val, cm_mcaps))
 cm_mcap_length = len(cm_mcaps)
 BITCOIN_CURRENT_MCAP = get_val(cm_mcaps[-1])
-BITCOIN_AVERAGE_MCAP = cm_mcaps_sum / cm_mcap_length
+BITCOIN_AVERAGE_MCAP = cm_mcaps_all_time_sum / cm_mcap_length
+
+cm_mcaps_200d_sum = sum(map(get_val, cm_mcaps[-200:]))
+BITCOIN_200D_AVG_MCAP = cm_mcaps_200d_sum / 200
 
 ## Bitcoin fear & greed index
 fgi_response = requests.get('https://api.alternative.me/fng/?limit=1')
