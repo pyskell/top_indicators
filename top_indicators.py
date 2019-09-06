@@ -15,7 +15,7 @@ import requests
 import locale
 import enum
 
-from shared_vars import BITCOIN_PRICE, BITCOIN_AVERAGE_FEE, BITCOIN_MVRV, BITCOIN_FEAR_GREED_INDEX, BITCOIN_AVERAGE_MCAP, BITCOIN_CURRENT_MCAP
+from shared_vars import BITCOIN_PRICE, BITCOIN_AVERAGE_FEE, BITCOIN_MVRV, BITCOIN_FEAR_GREED_INDEX, BITCOIN_AVERAGE_MCAP, BITCOIN_CURRENT_MCAP, BITCOIN_200D_AVG_MCAP
 from progress_bar import progress_bar
 
 # All top indicators should reach 100% at their conservative estimate
@@ -285,9 +285,21 @@ def top_cap():
 	return metric
 
 
+def mayer_multiple():
+	# http://charts.woobull.com/bitcoin-mayer-multiple/
+	metric = Metric("Mayer Multiple", "Last bull run was ~3.8 at peak, this is declining though so targeting 3.1 (which is just a guess based on nothing)", units="ratio")
+
+	# Note: Using market cap instead of price to cut down on queries but shouldn't make a difference
+	metric.current = BITCOIN_CURRENT_MCAP / BITCOIN_200D_AVG_MCAP
+	metric.target = 3.1
+	metric.remaining = metric.target - metric.current
+
+	return metric
+
+
 if __name__ == "__main__":
 	# NOTE: Tabulate has an issue where if it encounters a value it can't format in a column it won't format the rest of the column
-	metrics = [days_after_halvening(), full_top_to_top_cycle(), price_from_previous_top(), average_fee(), top_cap(), gbtc(), mvrv(), google_trends(), fear_and_greed()]
+	metrics = [days_after_halvening(), full_top_to_top_cycle(), price_from_previous_top(), average_fee(), top_cap(), gbtc(), mayer_multiple(), mvrv(), google_trends(), fear_and_greed()]
 	# metrics = [price_from_previous_top()]
 	results = []
 
