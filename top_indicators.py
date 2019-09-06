@@ -27,6 +27,8 @@ from progress_bar import progress_bar
 # For the most part I don't think data pre-2012 is very relevant or reliable
 # Data from 2013 onward is preferable, 2014+ is ideal
 
+# TODO: ADD MVRV z-score with target of ~10 (tops at 11-13 historically) http://archive.is/PJ6Os
+
 
 locale.setlocale(locale.LC_ALL, '')
 pytrends = TrendReq()
