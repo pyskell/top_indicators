@@ -245,7 +245,9 @@ def mvrv():
 
 
 def gbtc():
-	metric = Metric("GBTC over NAV", "Last run GBTC market price traded at a peak of 2x NAV at the top. Looking for 1.8x.", 
+	# VanEck ETF may reduce the effectiveness of this indicator https://twitter.com/krugermacro/status/1168913327159992320
+	# https://www.vaneck.com/institutional/bitcoin-144a/faq?vecs=true
+	metric = Metric("GBTC over NAV", "Last run GBTC market price traded at a peak of 2x NAV at the top. Looking for 1.8x. VanEck ETF may reduce NAV differential", 
 		units="dollars")
 
 	session = HTMLSession()
