@@ -14,6 +14,7 @@ import numbers
 import requests
 import locale
 import enum
+import sys
 
 from shared_vars import BITCOIN_PRICE, BITCOIN_AVERAGE_FEE, BITCOIN_MVRV, BITCOIN_FEAR_GREED_INDEX, BITCOIN_AVERAGE_MCAP, BITCOIN_CURRENT_MCAP, BITCOIN_200D_AVG_MCAP
 from progress_bar import progress_bar
@@ -32,7 +33,13 @@ from progress_bar import progress_bar
 
 locale.setlocale(locale.LC_ALL, '')
 pytrends = TrendReq()
-engine = create_engine('sqlite:///top_indicators.db')
+
+if sys.argv[1]:
+	print("Saving DB to: " + sys.argv[1])
+	engine = create_engine('sqlite:///' + sys.argv[1])
+else:
+	engine = create_engine('sqlite:///top_indicators.db')
+
 Base = declarative_base(bind=engine)
 
 class Indicator(enum.Enum):
