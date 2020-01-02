@@ -49,9 +49,9 @@ if __name__ == "__main__":
 		units="dollars",
 		indicator_type=Indicator.LEADING)
 	# Monthly jumped to 39 in Nov 2017 prior to taking off to 100 in December
-	google_trends = GoogleTrends("Google trends top", "Google trends spike hard at tops. Any move >=80 index is probably top on the longest timeframe. > Caveat: This is an index",
-		units="index",
-		indicator_type=Indicator.LEADING)
+	#google_trends = GoogleTrends("Google trends top", "Google trends spike hard at tops. Any move >=80 index is probably top on the longest timeframe. > Caveat: This is an index",
+	#	units="index",
+	#	indicator_type=Indicator.LEADING)
 	average_fee = AverageFee("Average Fee", "Last run when fees jumped >25 we were close to the top",
 		units="dollars",
 		indicator_type=Indicator.LEADING)
@@ -70,7 +70,8 @@ if __name__ == "__main__":
 		"Last bull run was ~3.8 at peak, this is declining though so targeting 3.1 (which is just a guess based on nothing)", 
 		units="ratio")
 	
-	metrics = [days_after_halvening, full_top_to_top_cycle, price_from_previous_top, average_fee, top_cap, gbtc, mayer_multiple, mvrv, google_trends, fear_and_greed]
+	metrics = [days_after_halvening, full_top_to_top_cycle, price_from_previous_top, average_fee, top_cap, gbtc, mayer_multiple, mvrv, fear_and_greed]
+	#google_trends,
 	results = []
 
 	for metric in metrics:
