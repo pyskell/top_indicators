@@ -7,7 +7,8 @@ from pytrends.request import TrendReq
 from sqlalchemy import Column, Integer, Date, Float, String, Enum, create_engine
 from sqlalchemy.ext.hybrid import hybrid_property
 from progress_bar import progress_bar
-from requests_html import HTMLSession
+from requests_html import HTMLSession, HTML
+import cloudscraper
 
 from shared_vars import BITCOIN_PRICE, BITCOIN_AVERAGE_FEE, BITCOIN_MVRV, BITCOIN_FEAR_GREED_INDEX, BITCOIN_AVERAGE_MCAP, BITCOIN_CURRENT_MCAP, BITCOIN_200D_AVG_MCAP
 from base import Base
@@ -189,11 +190,12 @@ class GBTC(Metric):
 		super(GBTC, self).__init__(*args, **kwargs)
 		# ETFs and other products may reduce the effectiveness of this indicator https://twitter.com/krugermacro/status/1168913327159992320
 		# https://www.vaneck.com/institutional/bitcoin-144a/faq?vecs=true
+		scraper = cloudscraper.create_scraper()
 		session = HTMLSession()
-		request = session.get('https://grayscale.co/bitcoin-investment-trust/')
+		html = HTML(html=scraper.get('https://grayscale.co/bitcoin-investment-trust/').text)
 
-		gbtc_market_pp_share = float(request.html.find('.price-market .body .price', first=True).text.replace('$',''))
-		gbtc_nav_pp_share = float(request.html.find('.price-nav .body .price', first=True).text.replace('$',''))
+		gbtc_market_pp_share = float(html.find('.price-market .body .price', first=True).text.replace('$',''))
+		gbtc_nav_pp_share = float(html.find('.price-nav .body .price', first=True).text.replace('$',''))
 
 		self.current = gbtc_nav_pp_share
 		self.target = gbtc_market_pp_share * 1.8
