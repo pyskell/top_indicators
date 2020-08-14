@@ -50,7 +50,7 @@ multipart==0.2
 mypy==0.770
 mypy-extensions==0.4.3
 natsort==7.0.1
-numpy==1.18.2
+#numpy==1.18.2
 packaging==20.3
 pandas==1.0.5
 parse==1.16.0
