@@ -64,8 +64,8 @@ pyee==7.0.2
 pylint==2.4.4
 pyparsing==2.4.7
 pyppeteer==0.2.2
-PyQt5==5.14.2
-PyQt5-sip==12.7.2
+#PyQt5==5.14.2
+#PyQt5-sip==12.7.2
 pyquery==1.4.1
 pyrsistent==0.16.0
 PySocks==1.7.1
